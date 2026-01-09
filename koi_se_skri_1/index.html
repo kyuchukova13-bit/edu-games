@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<title>Коя дума се скри? - Нива по трудност</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #e0f7fa;
+        text-align: center;
+        padding: 20px;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .screen {
+        background: white;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 40px;
+        border-radius: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        border: 2px solid #b2ebf2;
+        display: none; /* Всички екрани са скрити първоначално */
+    }
+
+    #startScreen { display: block; } /* Показваме само началния */
+
+    h1 { color: #6a1b9a; font-size: 36px; margin-bottom: 10px; }
+    .author-name { font-style: italic; color: #7e57c2; font-weight: bold; margin-bottom: 20px; }
+
+    .level-indicator {
+        background: #ff7043;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        display: inline-block;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    #wordBox {
+        font-size: 70px;
+        font-weight: bold;
+        margin: 20px auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 30px;
+        border: 6px solid #9575cd;
+        min-width: 250px;
+        color: #4a148c;
+    }
+
+    .options {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        min-height: 100px;
+    }
+
+    button {
+        font-size: 26px;
+        padding: 15px 30px;
+        margin: 10px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        background: #9575cd;
+        color: white;
+        box-shadow: 0 5px 0 #673ab7;
+        transition: 0.2s;
+        font-weight: bold;
+    }
+
+    button:active { transform: translateY(4px); box-shadow: none; }
+
+    .start-btn { background: #ff7043; box-shadow: 0 5px 0 #e64a19; font-size: 30px; }
+    
+    .correct { background: #4caf50 !important; box-shadow: 0 5px 0 #388e3c !important; }
+    .wrong { background: #ef5350 !important; box-shadow: 0 5px 0 #d32f2f !important; }
+
+    #message { font-size: 32px; margin-top: 20px; font-weight: bold; color: #6a1b9a; min-height: 40px; }
+
+    /* Брандиране */
+    .branding { position: fixed; bottom: 20px; right: 20px; text-align: right; }
+    .logo-svg { width: 50px; height: 50px; }
+    .branding-text { font-size: 10px; font-weight: bold; color: #2c3e50; }
+</style>
+</head>
+<body>
+
+<div id="startScreen" class="screen">
+    <h1>👀 КОЯ ДУМА СЕ СКРИ?</h1>
+    <div class="author-name">Автор: D. Kyuchukova</div>
+    <div style="text-align: left; background: #fff9f7; padding: 20px; border-radius: 20px; border: 2px dashed #ffab91;">
+        <p><b>Ниво 1:</b> НАЧИНАЕЩ (3-4 букви) 🐣</p>
+        <p><b>Ниво 2:</b> МАЙСТОР(4-5 букви) 🦊</p>
+        <p><b>Ниво 3:</b> ЕКСПЕРТ (5-6 букви) 🦁</p>
+    </div>
+    <br>
+    <button class="start-btn" onclick="startLevel(1)">ЗАПОЧНИ ИГРАТА ▶️</button>
+</div>
+
+<div id="gameScreen" class="screen">
+    <div id="levelDisplay" class="level-indicator">Ниво 1</div>
+    <div id="wordBox"></div>
+    <div class="options" id="optionsContainer">
+        <button id="opt0" onclick="check(0)"></button>
+        <button id="opt1" onclick="check(1)"></button>
+        <button id="opt2" onclick="check(2)"></button>
+    </div>
+    <div id="message"></div>
+</div>
+
+<div id="interimScreen" class="screen">
+    <h1 style="font-size: 50px;">🎉 БРАВО!</h1>
+    <p id="interimText" style="font-size: 24px;"></p>
+    <button class="start-btn" id="nextLevelBtn" onclick="goToNextLevel()">КЪМ СЛЕДВАЩО НИВО 🚀</button>
+</div>
+
+<div id="endScreen" class="screen">
+    <h1 style="font-size: 50px;">🏆 ПОБЕДИТЕЛ!</h1>
+    <p style="font-size: 24px;">Ти си отличен читател!</p>
+    <button class="start-btn" onclick="location.reload()">ИГРАЙ ОТНАЧАЛО 🔄</button>
+</div>
+
+<div class="branding">
+    <div class="logo-svg">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" fill="none" stroke="#2c3e50" stroke-width="8"/>
+            <text x="50%" y="62%" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="38" fill="#2c3e50">DK</text>
+        </svg>
+    </div>
+    <div class="branding-text">D. KYUCHUKOVA</div>
+</div>
+
+<script>
+// ДУМИТЕ, РАЗДЕЛЕНИ ПО НИВА (според броя букви)
+const database = {
+    1: [ // 3-4 букви
+        { w: "ЗИД", o: ["ЗИД", "ЗАД", "ЗИМ"] },
+        { w: "СОК", o: ["СОК", "КОС", "СОЛ"] },
+        { w: "МЕД", o: ["МЕТ", "МЕД", "МЕДИ"] },
+        { w: "МИДА", o: ["МИДА", "МИЛА", "МОДА"] },
+        { w: "ПАРК", o: ["ПРАК", "ПАРА", "ПАРК"] },
+        { w: "ПЛАТ", o: ["ПЛАТ", "ПЛЪТ", "ПЛАН"] },
+        { w: "ПЛОД", o: ["ПЛОД", "ПЛОТ", "ПЛОЩ"] },
+        { w: "СУПА", o: ["СУША", "КУПА", "СУПА"] },
+        { w: "ПАТЕ", o: ["ПИТЕ", "ПАТЕ", "ПЕТЕ"] },
+        { w: "КРАК", o: ["КРАГ", "КРАК", "ВРАГ"] },
+        { w: "РЕКА", o: ["РЪКА", "РЕКА", "РЕКИ"] },
+        { w: "ГЛАС", o: ["ГЛАС", "ГЛАД", "ГОЛ"] }
+    ],
+    2: [ // 4-5 букви
+        { w: "КОТЕ", o: ["КОТО", "КОТЕ", "КУЧЕ"] },
+        { w: "БАБА", o: ["БОБИ", "БАБА", "БАБИ"] },
+        { w: "КРЪГ", o: ["КРАГ", "КРЪГ", "КРЪВ"] },
+        { w: "БЛОК", o: ["БЛОК", "БЛОГ", "ВЪЛК"] },
+        { w: "СТОЯ", o: ["СТАЯ", "СТОЯ", "СТОП"] },
+        { w: "БРЯГ", o: ["БЛАГ", "БРЯГ", "БРЕГ"] },
+        { w: "КНИГА", o: ["КНИГИ", "КНИГА", "КИНГА"] },
+        { w: "РОТОР", o: ["РОТОР", "МОТОР", "РОБОТ"] },
+        { w: "МОТОР", o: ["МЕТЪР", "МОТОР", "МОТО"] },
+        { w: "ГРЪМ", o: ["ГРАМ", "ГРИМ", "ГРЪМ"] }
+    ],
+    3: [ // 5-6+ букви
+        { w: "БЛУЗА", o: ["БЛУЗА", "БЛУС", "БУЗА"] },
+        { w: "ЛИНИЯ", o: ["ЛИНИЯ", "ЛИМОН", "ЛУНИЯ"] },
+        { w: "ОТБОР", o: ["ОБОР", "ОТБОР", "ОТВОР"] },
+        { w: "ПЕТЛЕ", o: ["ПЕТЛЕ", "ПАТЕ", "ПИТЛЕ"] },
+        { w: "ЦВЕТЕ", o: ["ЦВЕТЕ", "СВЕТЕ", "ЦВЕТО"] },
+        { w: "ВРАТА", o: ["ВРАТА", "ВРАТИ", "ВРАНИ"] },
+        { w: "СЛЪНЦЕ", o: ["СЛАНЦЕ", "СЛЪНЦЕ", "СЛЪНЦО"] },
+        { w: "МЛЯКО", o: ["МЛЯКО", "МЛЕКО", "МЛЯКА"] },
+        { w: "ЯБЪЛКА", o: ["ЯГОДА", "ЯБЪЛКА", "ЯБЪЛКО"] },
+        { w: "УЧИЛИЩЕ", o: ["УЧЕЛИЩЕ", "УЧИЛИЩИ", "УЧИЛИЩЕ"] }
+    ]
+};
+
+let level = 1;
+let index = 0;
+let currentWords = [];
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+}
+
+function startLevel(n) {
+    level = n;
+    index = 0;
+    // Вземаме думите за нивото и ги разбъркваме случайно
+    currentWords = [...database[level]].sort(() => Math.random() - 0.5);
+    document.getElementById("levelDisplay").innerText = "Ниво " + level;
+    showScreen("gameScreen");
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const q = currentWords[index];
+    const box = document.getElementById("wordBox");
+    const opts = document.getElementById("optionsContainer");
+    const msg = document.getElementById("message");
+
+    msg.innerHTML = "";
+    opts.style.visibility = "hidden";
+    box.style.visibility = "visible";
+    box.innerText = q.w;
+
+    // Думата се скрива след 3 секунди
+    setTimeout(() => {
+        box.style.visibility = "hidden";
+        for (let i = 0; i < 3; i++) {
+            const btn = document.getElementById("opt" + i);
+            btn.innerText = q.o[i];
+            btn.className = ""; // махаме цветовете
+        }
+        opts.style.visibility = "visible";
+    }, 3000);
+}
+
+function check(i) {
+    const q = currentWords[index];
+    const btn = document.getElementById("opt" + i);
+    
+    if (btn.innerText === q.w) {
+        btn.classList.add("correct");
+        document.getElementById("message").innerHTML = "🌟 Браво!";
+        setTimeout(next, 1200);
+    } else {
+        btn.classList.add("wrong");
+        document.getElementById("message").innerHTML = "❌ Опитай пак!";
+    }
+}
+
+function next() {
+    index++;
+    if (index >= currentWords.length) {
+        if (level < 3) {
+            document.getElementById("interimText").innerText = `Ти успешно прочете думите в Ниво ${level}!`;
+            showScreen("interimScreen");
+        } else {
+            showScreen("endScreen");
+        }
+    } else {
+        loadQuestion();
+    }
+}
+
+function goToNextLevel() {
+    startLevel(level + 1);
+}
+</script>
+
+</body>
+</html>

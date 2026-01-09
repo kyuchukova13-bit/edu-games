@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Буквено Бинго - Първокласници</title>
+    <style>
+        :root {
+            --pink: #ff00cc;
+            --purple: #9933ff;
+            --cyan: #00e5ff;
+            --lime: #ccff00;
+            --ball-grad: radial-gradient(circle at 30% 30%, #ffffff 0%, #e0e0e0 20%, #a1a1a1 60%, #404040 100%);
+        }
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100vh;
+            font-family: 'Verdana', sans-serif;
+            background: radial-gradient(circle, #2c003e 0%, #000000 100%);
+            color: white;
+        }
+
+        /* ИГРОВИ ЕКРАНИ (ИНТЕРФЕЙС) */
+        #intro-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, var(--purple), var(--pink));
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; text-align: center;
+        }
+        #intro-screen h1 { font-size: 80px; margin: 0; color: var(--lime); text-shadow: 5px 5px 0px #333; }
+        .author { font-size: 24px; margin: 15px 0; font-weight: bold; }
+        .btn-group { display: flex; gap: 20px; margin-top: 30px; }
+        .main-btn { padding: 25px 45px; font-size: 26px; cursor: pointer; border: none; border-radius: 15px; font-weight: bold; transition: 0.3s; text-transform: uppercase; }
+        #start-btn { background: var(--cyan); color: #000; box-shadow: 0 8px 0px #008ba3; }
+        #print-trigger-btn { background: var(--lime); color: #000; box-shadow: 0 8px 0px #8ea300; }
+
+        #history-bar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 110px;
+            background: rgba(255, 255, 255, 0.15); display: flex; align-items: center;
+            padding: 0 20px; gap: 12px; overflow-x: auto; border-bottom: 5px solid var(--pink);
+            z-index: 10; box-sizing: border-box;
+        }
+        .history-ball { 
+            min-width: 70px; height: 70px; background: var(--ball-grad); border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 38px; font-weight: bold; color: #000; 
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.4), 3px 5px 10px rgba(0,0,0,0.5); 
+        }
+
+        #game-container { display: flex; height: 100vh; width: 100vw; align-items: center; justify-content: center; gap: 50px; padding-top: 100px; box-sizing: border-box; }
+        #lotto-sphere { position: relative; width: 450px; height: 450px; background: rgba(255,255,255,0.05); border: 15px solid var(--cyan); border-radius: 50%; overflow: hidden; }
+        .ball { 
+            position: absolute; width: 55px; height: 55px; background: var(--ball-grad); border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 24px; 
+            box-shadow: inset -3px -3px 10px rgba(0,0,0,0.5), 2px 2px 5px rgba(0,0,0,0.3); 
+        }
+        .card-inner { width: 350px; height: 350px; background: white; border-radius: 40px; display: flex; align-items: center; justify-content: center; font-size: 240px; font-weight: bold; color: var(--pink); border: 12px solid var(--lime); box-shadow: 0 0 40px var(--cyan); }
+        #draw-btn { margin-top: 30px; padding: 20px 60px; font-size: 32px; background: var(--pink); color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 10px #9e007e; }
+
+        /* НАСТРОЙКИ ЗА ПЕЧАТ - ФИКСИРАНИ ЗА ПРАВИЛНА ГЕОМЕТРИЯ */
+        #tickets-layer { display: none; background: white; color: black; }
+        
+        .print-page { 
+            width: 210mm; height: 297mm; padding: 5mm 0; margin: 0 auto; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            page-break-after: always; box-sizing: border-box; background: white;
+        }
+
+        .ticket { 
+            width: 185mm; height: 135mm; border: 2px solid #000; 
+            padding: 8mm; margin: 5mm 0; box-sizing: border-box; border-radius: 25px; 
+            display: flex; flex-direction: column; align-items: center; background: white;
+            position: relative;
+        }
+
+        .ticket-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            width: 95%; margin-bottom: 10px; font-family: Arial, sans-serif;
+        }
+        .ticket-header .title { font-size: 26px; font-weight: bold; color: #1a5e4d; }
+        .ticket-header .info { font-size: 11px; color: #333; }
+
+        .grid-container {
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            grid-template-rows: repeat(5, 1fr); 
+            gap: 10px;
+            width: 95%; /* Свиваме мрежата малко навътре */
+            flex-grow: 1;
+        }
+
+        .cell {
+            border: 2px solid #000; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; font-weight: bold; font-family: Arial;
+            background: white; width: 100%; height: 100%;
+        }
+
+        .cell-star { border: 2px dashed #1a5e4d; color: #1a5e4d; font-size: 45px; }
+        .footer-text { text-align: center; font-style: italic; font-size: 13px; margin-top: 10px; color: #333; font-weight: bold; font-family: Arial; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            body { background: white !important; margin: 0; }
+            #intro-screen, #game-container, #history-bar { display: none !important; }
+            #tickets-layer { display: block !important; }
+            .print-page { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-screen">
+        <h1>БУКВЕНО БИНГО</h1>
+        <div class="author">Created by Dochka Kyuchukova</div>
+        <div class="btn-group">
+            <button class="main-btn" id="print-trigger-btn" onclick="window.print()">🖨️ Печат на билети</button>
+            <button class="main-btn" id="start-btn" onclick="startGame()">🚀 Старт на играта</button>
+        </div>
+    </div>
+
+    <div id="history-bar"></div>
+
+    <div id="game-container">
+        <div id="lotto-sphere"></div>
+        <div style="text-align:center;">
+            <div class="card-inner" id="current-display">?</div>
+            <button id="draw-btn" onclick="drawBall()">ТЕГЛИ</button>
+        </div>
+    </div>
+
+    <div id="tickets-layer"></div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(f, d) {
+            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            o.connect(g); g.connect(audioCtx.destination);
+            o.frequency.value = f; g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + d);
+            o.start(); o.stop(audioCtx.currentTime + d);
+        }
+
+        const letters = [['А','а'],['Б','б'],['В','в'],['Г','г'],['Д','д'],['Е','е'],['Ж','ж'],['З','з'],['И','и'],['Й','й'],['К','к'],['Л','л'],['М','м'],['Н','н'],['О','о'],['П','п'],['Р','р'],['С','с'],['Т','т'],['У','у'],['Ф','ф'],['Х','х'],['Ц','ц'],['Ч','ч'],['Ш','ш'],['Щ','щ'],['Ъ','ъ'],['Ь','ь'],['Ю','ю'],['Я','я']];
+        let pool = [...letters];
+        const balls = [];
+        const sphere = document.getElementById('lotto-sphere');
+
+        function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            document.getElementById('intro-screen').style.display = 'none';
+        }
+
+        letters.forEach((pair) => {
+            const el = document.createElement('div');
+            el.className = 'ball'; el.innerText = pair[1]; 
+            el.style.left = Math.random() * 380 + 'px'; el.style.top = Math.random() * 380 + 'px';
+            sphere.appendChild(el);
+            balls.push({ el, x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, speed: 1.5, pair: pair });
+        });
+
+        function update() {
+            balls.forEach(b => {
+                let x = parseFloat(b.el.style.left); let y = parseFloat(b.el.style.top);
+                if (x <= 5 || x >= 395) b.x *= -1; if (y <= 5 || y >= 395) b.y *= -1;
+                b.el.style.left = (x + b.x * b.speed) + 'px'; b.el.style.top = (y + b.y * b.speed) + 'px';
+            });
+            requestAnimationFrame(update);
+        }
+        update();
+
+        function drawBall() {
+            if (pool.length === 0) return;
+            const btn = document.getElementById('draw-btn');
+            btn.disabled = true;
+            balls.forEach(b => b.speed = 15);
+            const mixSound = setInterval(() => playSound(200 + Math.random()*200, 0.1), 100);
+
+            setTimeout(() => {
+                clearInterval(mixSound);
+                balls.forEach(b => b.speed = 1.5);
+                playSound(500, 0.4);
+                const rIdx = Math.floor(Math.random() * pool.length);
+                const picked = pool.splice(rIdx, 1)[0];
+                const ballObj = balls.find(b => b.pair[1] === picked[1]);
+                if(ballObj) ballObj.el.style.display = 'none';
+                document.getElementById('current-display').innerText = picked[1];
+                const bar = document.getElementById('history-bar');
+                const hBall = document.createElement('div');
+                hBall.className = 'history-ball'; hBall.innerText = picked[1];
+                bar.prepend(hBall);
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        function generateAllTickets() {
+            const container = document.getElementById('tickets-layer');
+            container.innerHTML = "";
+            for (let i = 1; i <= 20; i++) {
+                if (i % 2 !== 0) {
+                    const page = document.createElement('div');
+                    page.className = 'print-page';
+                    container.appendChild(page);
+                }
+                const currentPage = container.lastElementChild;
+                const shuffled = [...letters].sort(() => 0.5 - Math.random()).slice(0, 24);
+                
+                let tHtml = `
+                    <div class="ticket">
+                        <div class="ticket-header">
+                            <span class="info">Created by Dochka Kyuchukova</span>
+                            <span class="title">БУКВЕНО БИНГО</span>
+                            <span class="info" style="font-weight:bold; font-size:14px">№${i}</span>
+                        </div>
+                        <div class="grid-container">`;
+                let idx = 0;
+                for(let r=0; r<5; r++){
+                    for(let c=0; c<5; c++){
+                        if(r===2 && c===2) tHtml += `<div class="cell cell-star">★</div>`;
+                        else { tHtml += `<div class="cell">${shuffled[idx][0]}</div>`; idx++; }
+                    }
+                }
+                tHtml += `</div>
+                        <div class="footer-text">Виж малката буква и зачеркни голямата в полето</div>
+                    </div>`;
+                currentPage.innerHTML += tHtml;
+            }
+        }
+        window.onload = generateAllTickets;
+    </script>
+</body>
+</html>
