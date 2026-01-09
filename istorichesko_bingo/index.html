@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BINGO - История 3. Клас - Д. Кючукова</title>
+    <title>BINGO - История 3. Клас - D. Kyuchukova</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Roboto+Condensed:wght@700&display=swap');
+
         :root {
             --bg-gradient: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             --gold-ball: radial-gradient(circle at 15px 15px, #f1c40f, #d35400);
@@ -14,8 +16,7 @@
         body, html {
             margin: 0; padding: 0; min-height: 100vh;
             font-family: 'Arial Black', Gadget, sans-serif;
-            background: #1a2a6c; 
-            color: white;
+            background: #1a2a6c; color: white;
         }
 
         /* НАЧАЛЕН ЕКРАН */
@@ -23,115 +24,73 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-gradient);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 500; transition: opacity 0.5s; text-align: center; padding: 20px;
-            box-sizing: border-box;
+            z-index: 500; text-align: center; padding: 20px; box-sizing: border-box;
         }
-        #intro-screen h1 { font-size: 65px; text-shadow: 4px 4px 10px rgba(0,0,0,0.5); margin-bottom: 10px; }
-        .author-name-intro { font-size: 30px; color: #fdbb2d; margin-bottom: 25px; }
+        #intro-screen h1 { font-size: 65px; text-shadow: 4px 4px 10px rgba(0,0,0,0.5); margin-bottom: 5px; }
+        .author-name-intro { font-size: 28px; color: #fdbb2d; margin-bottom: 25px; font-family: 'Segoe UI', sans-serif; }
         
         .instructions-intro { 
             font-size: 21px; line-height: 1.5; max-width: 800px; 
             background: rgba(0,0,0,0.3); padding: 35px; border-radius: 20px; margin-bottom: 40px;
             font-family: 'Segoe UI', sans-serif; text-align: left;
         }
-
         .btn-group { display: flex; gap: 20px; }
-
         #start-btn, #open-generator-btn { 
             padding: 20px 60px; font-size: 28px; cursor: pointer; 
-            border: none; border-radius: 50px; 
-            font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            border: none; border-radius: 50px; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: 0.2s;
         }
         #start-btn { background: white; color: #b21f1f; }
         #open-generator-btn { background: #fdbb2d; color: #333; }
-        #start-btn:hover, #open-generator-btn:hover { transform: scale(1.05); }
 
-        /* ОСНОВЕН ЛЕЙАУТ ИГРА */
-        .main-container {
-            display: none; height: 100vh; width: 100vw;
-            align-items: center; justify-content: space-around; padding: 20px; box-sizing: border-box;
-        }
-
-        .sphere-section { flex: 1.2; display: flex; flex-direction: column; align-items: center; }
-        #lotto-sphere {
-            position: relative; width: 480px; height: 480px;
-            background: rgba(255,255,255,0.05); border: 12px solid rgba(255,255,255,0.2);
-            border-radius: 50%; overflow: hidden; box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
-        }
-
-        .ball {
-            position: absolute; width: 52px; height: 52px;
-            background: var(--gold-ball); border-radius: 50%;
-            color: white; font-weight: bold; font-size: 20px;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        #check-btn { 
-            margin-top: 15px; padding: 10px 25px; background: none; border: 1px solid rgba(255,255,255,0.4); 
-            color: white; border-radius: 5px; cursor: pointer; font-family: sans-serif; font-size: 14px;
-        }
-
-        .answer-section { flex: 1; display: flex; flex-direction: column; align-items: center; }
-        #bingo-title { font-size: 100px; margin: 0; color: #fdbb2d; letter-spacing: 15px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
-
-        .flip-card {
-            width: 95%; height: 380px; position: relative;
-            transform-style: preserve-3d; transition: transform 0.8s;
-            margin: 20px 0; 
-        }
+        /* ИГРА */
+        .main-container { display: none; height: 100vh; width: 100vw; align-items: center; justify-content: space-around; padding: 20px; box-sizing: border-box; }
+        #lotto-sphere { position: relative; width: 480px; height: 480px; background: rgba(255,255,255,0.05); border: 12px solid rgba(255,255,255,0.2); border-radius: 50%; overflow: hidden; }
+        .ball { position: absolute; width: 52px; height: 52px; background: var(--gold-ball); border-radius: 50%; color: white; font-weight: bold; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        #check-btn { margin-top: 15px; padding: 10px 25px; background: none; border: 1px solid rgba(255,255,255,0.4); color: white; cursor: pointer; }
+        .answer-section { flex: 1.2; display: flex; flex-direction: column; align-items: center; }
+        #bingo-title { font-size: 100px; margin: 0; color: #fdbb2d; letter-spacing: 15px; }
+        .flip-card { width: 95%; height: 380px; position: relative; transform-style: preserve-3d; transition: transform 0.8s; margin: 20px 0; }
         .is-flipped { transform: rotateX(180deg); }
-
-        .card-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 40px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; box-sizing: border-box;
-        }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; box-sizing: border-box; }
         .card-front { background: rgba(255,255,255,0.08); border: 4px dashed rgba(255,255,255,0.2); }
         .card-back { background: white; transform: rotateX(180deg); border: 10px solid #f1c40f; color: #1a2a6c; }
+        #result-ball { width: 100px; height: 100px; background: var(--gold-ball); border-radius: 50%; color: white; font-size: 50px; display: flex; align-items: center; justify-content: center; border: 4px solid #fff; margin-bottom: 10px; }
+        #riddle-text { font-size: 38px; text-align: center; font-weight: bold; line-height: 1.2; font-family: 'Segoe UI', sans-serif; }
+        #draw-btn { padding: 20px 80px; font-size: 35px; background: var(--accent-red); color: white; border: 4px solid #fdbb2d; border-radius: 100px; cursor: pointer; font-weight: bold; }
 
-        #result-ball {
-            width: 100px; height: 100px; background: var(--gold-ball);
-            border-radius: 50%; color: white; font-size: 50px;
-            display: flex; align-items: center; justify-content: center; margin-bottom: 15px; border: 4px solid #fff;
-        }
-        #riddle-text { font-size: 38px; text-align: center; margin: 0; font-weight: bold; line-height: 1.2; font-family: 'Segoe UI', sans-serif; }
-
-        #draw-btn {
-            padding: 20px 80px; font-size: 35px;
-            background: var(--accent-red); color: white; border: 4px solid #fdbb2d; 
-            border-radius: 100px; cursor: pointer; font-weight: bold;
-            box-shadow: 0 8px #922b21;
-        }
-
-        /* ЕКРАН ЗА ПРОВЕРКА */
-        #check-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.98); z-index: 600;
-            display: none; flex-direction: column; align-items: center; padding: 40px;
-        }
-        #check-log {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px; width: 90%; overflow-y: auto; margin-top: 30px;
-        }
-        .log-item { background: white; color: #333; padding: 12px; border-radius: 8px; font-size: 18px; border-left: 10px solid #f1c40f; font-family: sans-serif; text-align: left;}
-
-        /* СТИЛОВЕ ЗА ГЕНЕРАТОРА НА КАРТИ */
-        #generator-section { display: none; background: #f0f0f0; color: #333; padding: 20px; text-align: center; overflow-y: auto; }
-        .gen-controls { background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .page { width: 21cm; min-height: 29.7cm; padding: 1cm; margin: 0 auto 1cm auto; background: white; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .ticket { width: 18cm; height: 12.5cm; border: 4px solid #333; border-radius: 15px; margin-bottom: 1.5cm; padding: 20px; box-sizing: border-box; background: #fff; display: flex; flex-direction: column; }
-        .ticket-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #b21f1f; margin-bottom: 15px; }
-        .ticket-title { font-size: 42px; color: #b21f1f; margin: 0; }
-        .ticket-number { background: #333; color: white; padding: 5px 15px; border-radius: 5px; }
-        .ticket table { border-collapse: separate; border-spacing: 8px; width: 100%; flex-grow: 1; }
-        .ticket td { border: 2px solid #333; width: 33.3%; height: 33.3%; text-align: center; font-size: 26px; font-weight: bold; background: #fafafa; border-radius: 8px; }
+        /* НОВИЯТ ГЕНЕРАТОР ОТ ВАШИЯ ФАЙЛ */
+        #generator-section { display: none; background: #f0f0f0; color: #333; padding: 20px; }
+        .gen-controls { background: white; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .page { width: 21cm; min-height: 29.7cm; padding: 1cm; margin: 0 auto; background: white; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         
+        .ticket { 
+            width: 18cm; height: 12.5cm; border: 4px solid #333; border-radius: 15px;
+            margin-bottom: 1.5cm; padding: 20px; box-sizing: border-box; background: #fff;
+            display: flex; flex-direction: column; position: relative;
+        }
+        .ticket-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #b21f1f; margin-bottom: 15px; padding-bottom: 5px; }
+        .ticket-title { font-family: 'Oswald', sans-serif; font-size: 42px; color: #b21f1f; text-transform: uppercase; letter-spacing: 3px; margin: 0; }
+        .ticket-number { font-family: 'Oswald', sans-serif; font-size: 24px; background: #333; color: #fff; padding: 5px 15px; border-radius: 5px; }
+        
+        .ticket table { border-collapse: separate; border-spacing: 8px; width: 100%; flex-grow: 1; table-layout: fixed; }
+        .ticket td { 
+            border: 2px solid #333; text-align: center; font-family: 'Roboto Condensed', sans-serif;
+            font-size: 26px; padding: 10px; background: #fafafa; border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05); line-height: 1.1; vertical-align: middle;
+        }
+        .ticket-footer { margin-top: 10px; display: flex; justify-content: space-between; font-size: 14px; font-style: italic; color: #666; }
+
+        #check-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 600; display: none; flex-direction: column; align-items: center; padding: 40px; }
+        #check-log { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; width: 90%; margin-top: 30px; }
+        .log-item { background: white; color: #333; padding: 12px; border-radius: 8px; border-left: 10px solid #f1c40f; font-family: sans-serif; text-align: left;}
+
         @media print {
-            #generator-section { background: white; padding: 0; }
-            .gen-controls, #intro-screen, .main-container { display: none !important; }
-            .page { margin: 0; padding: 0.5cm; box-shadow: none; page-break-after: always; }
-            .ticket { page-break-inside: avoid; }
+            .gen-controls, #intro-screen, #game-main, #check-screen { display: none !important; }
+            body { background: white; }
+            #generator-section { display: block !important; padding: 0; }
+            .page { margin: 0; padding: 0.5cm; page-break-after: always; border: none; }
+            .ticket { page-break-inside: avoid; border: 3px solid #000; -webkit-print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -139,14 +98,13 @@
 
     <div id="intro-screen">
         <h1>ИСТОРИЧЕСКО БИНГО</h1>
-        <div class="author-name-intro">Преподавател: Дочка Кючукова</div>
+        <div class="author-name-intro">Created by Dochka Kyuchukova</div>
         <div class="instructions-intro">
             <strong>УКАЗАНИЯ ЗА ИГРАТА:</strong><br><br>
             • Слушай внимателно загадката, която ще се появи на екрана.<br>
             • Ако знаеш отговора и го откриеш в своя билет – зачеркни го!<br>
             • Когато запълниш всички 9 полета в билета си, извикай силно <b>"БИНГО"</b>!<br>
-            • Победителят ще получи званието "Знатен историк" и специална грамота.
-        </div>
+                   </div>
         <div class="btn-group">
             <button id="start-btn" onclick="startGame()">СТАРТ</button>
             <button id="open-generator-btn" onclick="openGenerator()">ПРИНТИРАЙ БИЛЕТИ</button>
@@ -155,9 +113,9 @@
 
     <div id="generator-section">
         <div class="gen-controls">
-            <h2 style="margin-top:0">Генератор на билети</h2>
-            <button onclick="window.print()" style="padding: 10px 30px; background: #b21f1f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">ПЕЧАТАЙ ВСИЧКИ (PDF)</button>
-            <button onclick="location.reload()" style="padding: 10px 30px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left:10px;">НАЗАД КЪМ ИГРАТА</button>
+            <h1>Генератор на Историческо Бинго</h1>
+            <button onclick="window.print()">ПЕЧАТАЙ БИЛЕТИТЕ</button>
+            <button onclick="location.reload()" style="background:#666; margin-left:10px;">НАЗАД</button>
         </div>
         <div id="tickets-container"></div>
     </div>
@@ -165,117 +123,65 @@
     <div id="check-screen">
         <h1 style="color: #fdbb2d;">ПРОВЕРКА НА ПОНЯТИЯТА</h1>
         <div id="check-log"></div>
-        <button style="margin-top: 40px; padding: 15px 50px; background: #2ecc71; color: white; border: none; border-radius: 10px; font-size: 22px; cursor: pointer; font-weight: bold;" onclick="closeCheck()">ОБРАТНО КЪМ ИГРАТА</button>
+        <button style="margin-top: 40px; padding: 15px 50px; background: #2ecc71; color: white; border: none; border-radius: 10px; font-size: 22px; cursor: pointer; font-weight: bold;" onclick="closeCheck()">ОБРАТНО</button>
     </div>
 
     <div class="main-container" id="game-main">
         <div class="sphere-section">
             <div id="lotto-sphere"></div>
-            <button id="check-btn" onclick="openCheck()">🔎 ПРОВЕРКА ЗА БИНГО</button>
+            <button id="check-btn" onclick="openCheck()">🔎 ПРОВЕРКА</button>
         </div>
-
         <div class="answer-section">
             <h1 id="bingo-title">BINGO</h1>
             <div class="flip-card" id="card">
-                <div class="card-face card-front">
-                    <span style="font-size: 120px; opacity: 0.1;">?</span>
-                </div>
-                <div class="card-face card-back">
-                    <div id="result-ball">0</div>
-                    <p id="riddle-text"></p>
-                </div>
+                <div class="card-face card-front"><span style="font-size: 150px; opacity: 0.1;">?</span></div>
+                <div class="card-face card-back"><div id="result-ball">0</div><p id="riddle-text"></p></div>
             </div>
             <button id="draw-btn" onclick="drawBall()">ИЗТЕГЛИ</button>
         </div>
     </div>
 
     <script>
-        const riddles = [
-            "Пътят, по който човечеството вече е минало.", "Десет рождени дни, събрани в една кутийка.", "Когато сто свещички не стигат за времето.", 
-            "Огромен скок във времето от цели 1000 години!", "Колкото време трябва на Земята за обиколка на Слънцето.", "Важна случка в историята.",
-            "Подреждаме случките една след друга.", "Книга, в която са записани приключенията на хората.", "Майсторите на златото.",
-            "Бащата със снопа пръчки.", "Конникът, който каза: „Тук ще бъде България!“", "Рождената дата на държавата ни.",
-            "Пътечка, по която „разхождаме“ датите.", "Векът, в който се родила Аспарухова България.", "Времето на славните закони на хан Крум.",
-            "Следите от миналото (монети, писма).", "Детектив с четка и лопатка.", "Къща за спомени и предмети.",
-            "Нашето голямо семейство със закони.", "Градът, от който се управлява държавата.", "Първата столица.",
-            "Храбрите ездачи - силата на българите.", "Цветни картини върху стените.", "Каменна статуя или плоча за героя."
-        ];
-
-        const terms = [
-            "История", "Десетилетие", "Век", "Хилядолетие", "Година", "Събитие", "Хронология", "Извори", "Траки", 
-            "Хан Кубрат", "Хан Аспарух", "681 година", "Линия на времето", "VII век", "Хан Крум", "Находки", 
-            "Археолог", "Музей", "Държава", "Столица", "Плиска", "Конница", "Стенописи", "Паметник"
-        ];
-
-        let pool = Array.from(Array(riddles.length).keys());
-        let drawnHistory = [];
+        const riddles = ["Всичко, което вече се е случило.", "Период от точно 10 години.", "Време, което продължава 100 години.", "Огромен период от точно 1000 години.", "Една обиколка на Земята около Слънцето.", "Важна случка в миналото.", "Подреждане на събитията едно след друго.", "Науката за миналото на човека.", "Древен народ, строител на гробници.", "Владетелят на Стара Велика България.", "Основателят на България на Балканите.", "Годината на създаване на България.", "Чертеж, върху който подреждаме датите.", "Кой век е 681 година?", "Кой век е 811 година?", "Предмети, от които научаваме за миналото.", "Учен, който прави разкопки под земята.", "Място, където се пазят стари предмети.", "Територия с общи закони и владетел.", "Най-важният град за управление на държавата.", "Първата столица на Аспарухова България.", "Основната част от войската на прабългарите.", "Рисунки върху стени на гробници.", "Построено, за да напомня за слава."];
+        const terms = ["ИСТОРИЯ", "ДЕСЕТИЛЕТИЕ", "ВЕК", "ХИЛЯДОЛЕТИЕ", "ГОДИНА", "СЪБИТИЕ", "ХРОНОЛОГИЯ", "ИЗВОРИ", "ТРАКИ", "ХАН КУБРАТ", "ХАН АСПАРУХ", "681 ГОДИНА", "ЛИНИЯ НА ВРЕМЕТО", "VII ВЕК", "ХАН КРУМ", "НАХОДКИ", "АРХЕОЛОГ", "МУЗЕЙ", "ДЪРЖАВА", "СТОЛИЦА", "ПЛИСКА", "КОННИЦА", "СТЕНОПИСИ", "ПАМЕТНИК"];
+        
+        let pool = Array.from(Array(riddles.length).keys()), drawnHistory = [];
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function startGame() {
-            document.getElementById('intro-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('intro-screen').style.display = 'none';
-                document.getElementById('game-main').style.display = 'flex';
-            }, 500);
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
-
-        function openGenerator() {
-            document.getElementById('intro-screen').style.display = 'none';
-            document.getElementById('generator-section').style.display = 'block';
-            generateTickets(20);
-        }
+        function startGame() { document.getElementById('intro-screen').style.display = 'none'; document.getElementById('game-main').style.display = 'flex'; if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function openGenerator() { document.getElementById('intro-screen').style.display = 'none'; document.getElementById('generator-section').style.display = 'block'; generateTickets(20); }
 
         function generateTickets(count) {
-            const container = document.getElementById('tickets-container');
-            container.innerHTML = '';
-            let currentPage;
-            for (let i = 1; i <= count; i++) {
-                if ((i - 1) % 2 === 0) {
-                    currentPage = document.createElement('div');
-                    currentPage.className = 'page';
-                    container.appendChild(currentPage);
-                }
-                const selected = [...terms].sort(() => 0.5 - Math.random()).slice(0, 9);
-                let ticketHtml = `<div class="ticket"><div class="ticket-header"><h1 class="ticket-title">BINGO</h1><div class="ticket-number">№${i}</div></div><table>`;
-                for (let row = 0; row < 3; row++) {
-                    ticketHtml += "<tr>";
-                    for (let col = 0; col < 3; col++) { ticketHtml += `<td>${selected[row * 3 + col]}</td>`; }
-                    ticketHtml += "</tr>";
-                }
-                ticketHtml += `</table><div style="margin-top:10px; font-style:italic; font-size:14px; color:#666">Д. Кючукова - Историческо Бинго</div></div>`;
-                currentPage.innerHTML += ticketHtml;
+            const container = document.getElementById('tickets-container'); container.innerHTML = '';
+            for (let i = 1; i <= count; i += 2) {
+                const page = document.createElement('div'); page.className = 'page';
+                page.innerHTML = createMarkup(i) + createMarkup(i + 1);
+                container.appendChild(page);
             }
         }
 
-        function playSound(f, d) {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.connect(g); g.connect(audioCtx.destination);
-            o.frequency.value = f;
-            g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            o.start(); o.stop(audioCtx.currentTime + d);
+        function createMarkup(num) {
+            const selected = [...terms].sort(() => 0.5 - Math.random()).slice(0, 9);
+            let h = `<div class="ticket"><div class="ticket-header"><h1 class="ticket-title">BINGO</h1><div class="ticket-number">№${num}</div></div><table>`;
+            for (let r = 0; r < 3; r++) { h += "<tr>"; for (let c = 0; c < 3; c++) h += `<td>${selected[r*3+c]}</td>`; h += "</tr>"; }
+            h += `</table><div class="ticket-footer"><span>Слушай загадката и зачеркни!</span><span>Made by D. Kyuchukova</span></div></div>`;
+            return h;
         }
 
-        const sphere = document.getElementById('lotto-sphere');
-        const balls = [];
+        function playSound(f, d) { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value = f; g.gain.setValueAtTime(0.05, audioCtx.currentTime); o.start(); o.stop(audioCtx.currentTime + d); }
+
+        const sphere = document.getElementById('lotto-sphere'), balls = [];
         for (let i = 0; i < riddles.length; i++) {
-            const el = document.createElement('div');
-            el.className = 'ball'; el.innerText = i + 1;
-            el.style.left = Math.random() * 420 + 'px';
-            el.style.top = Math.random() * 420 + 'px';
-            sphere.appendChild(el);
-            balls.push({ el, x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, speed: 1.5 });
+            const el = document.createElement('div'); el.className = 'ball'; el.innerText = i + 1;
+            el.style.left = Math.random() * 400 + 'px'; el.style.top = Math.random() * 400 + 'px';
+            sphere.appendChild(el); balls.push({ el, x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, speed: 1.5 });
         }
 
         function update() {
             balls.forEach(b => {
-                let x = parseFloat(b.el.style.left);
-                let y = parseFloat(b.el.style.top);
-                if (x <= 0 || x >= 428) b.x *= -1;
-                if (y <= 0 || y >= 428) b.y *= -1;
-                b.el.style.left = (x + b.x * b.speed) + 'px';
-                b.el.style.top = (y + b.y * b.speed) + 'px';
+                let x = parseFloat(b.el.style.left), y = parseFloat(b.el.style.top);
+                if (x <= 0 || x >= 425) b.x *= -1; if (y <= 0 || y >= 425) b.y *= -1;
+                b.el.style.left = (x + b.x * b.speed) + 'px'; b.el.style.top = (y + b.y * b.speed) + 'px';
             });
             requestAnimationFrame(update);
         }
@@ -283,14 +189,12 @@
 
         function drawBall() {
             if (pool.length === 0) return;
-            const btn = document.getElementById('draw-btn');
-            btn.disabled = true;
+            const btn = document.getElementById('draw-btn'); btn.disabled = true;
             document.getElementById('card').classList.remove('is-flipped');
             balls.forEach(b => b.speed = 18);
             const mixSound = setInterval(() => playSound(150 + Math.random()*250, 0.05), 80);
             setTimeout(() => {
-                clearInterval(mixSound);
-                balls.forEach(b => b.speed = 1.5);
+                clearInterval(mixSound); balls.forEach(b => b.speed = 1.5);
                 playSound(440, 0.2);
                 const rIdx = pool.splice(Math.floor(Math.random()*pool.length), 1)[0];
                 const ballEl = balls.find(b => b.el.innerText == (rIdx+1));
@@ -304,11 +208,9 @@
         }
 
         function openCheck() {
-            const log = document.getElementById('check-log');
-            log.innerHTML = '';
+            const log = document.getElementById('check-log'); log.innerHTML = '';
             drawnHistory.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'log-item';
+                const div = document.createElement('div'); div.className = 'log-item';
                 div.innerHTML = `<b>№${item.num}</b> — ${item.term}`;
                 log.appendChild(div);
             });
