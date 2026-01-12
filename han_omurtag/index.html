@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хан Омуртаг - Строителят и Владетелят</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Philosopher:wght@400;700&display=swap');
+        
+        :root {
+            --gold: #d4af37;
+            --royal-blue: #1e3a8a;
+            --paper: #fdfaf1;
+            --correct: #10b981;
+            --wrong: #ef4444;
+        }
+
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .medieval-font { font-family: 'Philosopher', sans-serif; }
+
+        .app-shell {
+            max-width: 650px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.12);
+            overflow: hidden;
+            border: 1px solid rgba(30, 58, 138, 0.1);
+        }
+
+        .tab-active {
+            background: white;
+            color: var(--royal-blue);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .opt-btn {
+            width: 100%;
+            text-align: left;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            border-radius: 14px;
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            border-color: var(--gold);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .opt-btn.correct { background-color: #d1fae5 !important; border-color: var(--correct) !important; color: #065f46; }
+        .opt-btn.wrong { background-color: #fee2e2 !important; border-color: var(--wrong) !important; color: #991b1b; }
+
+        .card-container { perspective: 1500px; height: 380px; width: 100%; }
+        .card-inner {
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .card-container.flipped .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 28px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 35px; text-align: center;
+        }
+        .card-front { background: white; border: 2px solid #e2e8f0; }
+        .card-back { 
+            background: linear-gradient(135deg, var(--royal-blue), #1e1b4b); 
+            color: white; transform: rotateY(180deg); 
+        }
+
+        .progress-fill { height: 100%; background: var(--royal-blue); transition: width 0.4s ease; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="app-shell">
+        <div class="p-8 text-center bg-blue-50/50 border-b border-blue-100">
+            <h1 class="medieval-font text-3xl font-bold text-blue-900">Хан Омуртаг</h1>
+            <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mt-2">Владетел и Общество</p>
+        </div>
+
+        <div class="flex p-3 bg-slate-100/50">
+            <button onclick="showTab('quiz')" id="t-quiz" class="flex-1 py-3 rounded-xl font-bold transition-all tab-active">ТЕСТ</button>
+            <button onclick="showTab('flash')" id="t-flash" class="flex-1 py-3 rounded-xl font-bold transition-all text-slate-400">КАРТИ</button>
+        </div>
+
+        <div id="view-quiz" class="p-8">
+            <div id="q-start" class="text-center py-6">
+                <div class="text-5xl mb-6">🏛️</div>
+                <h2 class="text-2xl font-bold mb-3 text-slate-800">Провери знанията си</h2>
+                <p class="text-slate-500 mb-8">Колко добре познаваш управлението на Омуртаг и живота в държавата?</p>
+                <button onclick="initQuiz()" class="w-full py-4 bg-blue-800 text-white rounded-2xl font-bold shadow-lg hover:bg-blue-900 transition-all">Започни теста</button>
+            </div>
+
+            <div id="q-active" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <span id="q-num" class="text-xs font-black text-slate-400">ВЪПРОС 1/8</span>
+                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">3. КЛАС</span>
+                </div>
+                <h2 id="question-text" class="text-xl font-bold mb-8 text-slate-800 leading-tight"></h2>
+                <div id="options-grid" class="mb-10"></div>
+                <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="q-end" class="hidden text-center py-10">
+                <h2 class="text-2xl font-bold">Браво! Твоят резултат:</h2>
+                <div class="text-7xl font-black text-blue-800 my-8" id="final-score">0/8</div>
+                <button onclick="location.reload()" class="px-8 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-black transition">Опитай отново</button>
+            </div>
+        </div>
+
+        <div id="view-flash" class="p-8 hidden">
+            <div class="card-container mb-8" id="card-obj" onclick="this.classList.toggle('flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <span class="text-blue-500 font-bold text-xs uppercase mb-4 tracking-tighter">ВЪПРОС</span>
+                        <h2 id="f-front" class="text-2xl font-bold text-slate-800"></h2>
+                        <p class="mt-8 text-[10px] text-slate-300 font-bold uppercase">Чукни за отговор</p>
+                    </div>
+                    <div class="card-back">
+                        <span class="text-white/50 font-bold text-xs uppercase mb-4 tracking-tighter">ОТГОВОР</span>
+                        <p id="f-back" class="text-xl font-medium"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between gap-4">
+                <button onclick="moveFlash(-1)" class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">⬅️</button>
+                <span id="f-count" class="font-bold text-blue-900">1 / 5</span>
+                <button onclick="moveFlash(1)" class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { q: "Каква титла е носил владетелят до средата на 9. век?", a: ["Цар", "Княз", "Хан"], c: 2 },
+            { q: "Кой е помагал на владетеля в управлението?", a: ["Търговците", "Болярите", "Селяните"], c: 1 },
+            { q: "Колко години е продължил мирът с Византия при Омуртаг?", a: ["10 години", "30 години", "50 години"], c: 1 },
+            { q: "Къде е преместено строителството на нови крепости и дворци?", a: ["Плиска", "София", "Преслав"], c: 0 },
+            { q: "Кой паметник е символ на единството на българската държава?", a: ["Златният медальон", "Мадарският конник", "Юртата"], c: 1 },
+            { q: "Кой от народите е бил предимно конен народ?", a: ["Славяните", "Траките", "Българите"], c: 2 },
+            { q: "Как се наричат преносимите жилища от кожа?", a: ["Юрти", "Землянки", "Дворци"], c: 0 },
+            { q: "Кой бог са почитали древните българи?", a: ["Перун", "Тангра", "Зевс"], c: 1 }
+        ];
+
+        const flashData = [
+            { f: "Боляри", b: "Знатни хора, помагали на владетеля в управлението." },
+            { f: "Хан Омуртаг", b: "Наричал се 'от Бога владетел в земята, в която се родил'." },
+            { f: "Мадарският конник", b: "Единствен по рода си в Европа, символ на силата ни." },
+            { f: "Славяни", b: "Земеделски народ, почитащ боговете сред природата." },
+            { f: "Християнство", b: "Религията, която траките приели първи още в 1. век." }
+        ];
+
+        let qIdx = 0, score = 0, fIdx = 0, active = true;
+
+        function showTab(t) {
+            document.getElementById('view-quiz').classList.toggle('hidden', t !== 'quiz');
+            document.getElementById('view-flash').classList.toggle('hidden', t !== 'flash');
+            document.getElementById('t-quiz').className = t === 'quiz' ? 'flex-1 py-3 rounded-xl font-bold transition-all tab-active' : 'flex-1 py-3 rounded-xl font-bold transition-all text-slate-400';
+            document.getElementById('t-flash').className = t === 'flash' ? 'flex-1 py-3 rounded-xl font-bold transition-all tab-active' : 'flex-1 py-3 rounded-xl font-bold transition-all text-slate-400';
+            if(t === 'flash') loadFlash();
+        }
+
+        function initQuiz() {
+            document.getElementById('q-start').classList.add('hidden');
+            document.getElementById('q-active').classList.remove('hidden');
+            loadQ();
+        }
+
+        function loadQ() {
+            active = true;
+            const d = quizData[qIdx];
+            document.getElementById('q-num').innerText = `ВЪПРОС ${qIdx+1}/${quizData.length}`;
+            document.getElementById('question-text').innerText = d.q;
+            document.getElementById('progress-bar').style.width = ((qIdx + 1) / quizData.length * 100) + "%";
+            const g = document.getElementById('options-grid');
+            g.innerHTML = '';
+            d.a.forEach((o, i) => {
+                const b = document.createElement('button');
+                b.className = 'opt-btn';
+                b.innerText = o;
+                b.onclick = () => {
+                    if(!active) return; active = false;
+                    if(i === d.c) { b.classList.add('correct'); score++; }
+                    else { b.classList.add('wrong'); g.children[d.c].classList.add('correct'); }
+                    setTimeout(() => { qIdx++; if(qIdx < quizData.length) loadQ(); else endQuiz(); }, 1200);
+                };
+                g.appendChild(b);
+            });
+        }
+
+        function endQuiz() {
+            document.getElementById('q-active').classList.add('hidden');
+            document.getElementById('q-end').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score}/${quizData.length}`;
+        }
+
+        function loadFlash() {
+            const d = flashData[fIdx];
+            document.getElementById('card-obj').classList.remove('flipped');
+            setTimeout(() => {
+                document.getElementById('f-front').innerText = d.f;
+                document.getElementById('f-back').innerText = d.b;
+            }, 200);
+            document.getElementById('f-count').innerText = `${fIdx + 1} / ${flashData.length}`;
+        }
+
+        function moveFlash(n) { fIdx = (fIdx + n + flashData.length) % flashData.length; loadFlash(); }
+    </script>
+</body>
+</html>
