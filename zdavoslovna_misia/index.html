@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Здравословен Супермаркет - Дочка Кючукова</title>
+    <style>
+        :root { 
+            --shelf-color: #e0c9a6; --shelf-shadow: #bfa57d;
+            --bg-color: #fdf6e3; --main-green: #27ae60;
+            --danger: #e74c3c;
+        }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: var(--bg-color); }
+        
+        .overlay { position: fixed; inset: 0; background: linear-gradient(135deg, #27ae60, #2ecc71); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; }
+        .overlay h1 { font-size: 4rem; margin-bottom: 5px; text-shadow: 3px 3px 0px rgba(0,0,0,0.2); }
+        .author { font-size: 1.8rem; margin-bottom: 25px; font-weight: bold; opacity: 0.9; }
+        .instruction-box { background: rgba(255,255,255,0.2); padding: 25px; border-radius: 25px; text-align: left; margin-bottom: 25px; max-width: 750px; border: 3px solid white; font-size: 1.7rem; line-height: 1.4; }
+
+        .shop-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 10px; height: 80vh; margin-top: 70px; }
+        .section { display: flex; flex-direction: column; gap: 8px; }
+        .shelf { 
+            background: var(--shelf-color); height: 75px; border-bottom: 10px solid var(--shelf-shadow); 
+            border-radius: 8px; display: flex; justify-content: space-evenly; align-items: flex-end; 
+            padding-bottom: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        .product { width: 60px; height: 60px; object-fit: contain; cursor: pointer; transition: 0.3s; }
+        /* Клас за вече избран продукт */
+        .already-picked { opacity: 0.15 !important; filter: grayscale(100%); cursor: default; pointer-events: none; }
+
+        .ui { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: white; padding: 8px 35px; border-radius: 50px; border: 4px solid var(--main-green); font-weight: bold; font-size: 1.8rem; z-index: 1100; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .certificate-box { 
+            background: #fff; color: #333; padding: 40px; border-radius: 10px; 
+            border: 12px double #bfa57d; width: 75%; max-width: 850px; 
+            position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.4); text-align: center;
+        }
+        .cert-header { font-size: 3.5rem; color: #2c3e50; margin: 0 0 10px 0; font-family: 'Times New Roman', serif; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .feedback-main { font-size: 2.2rem; font-weight: bold; color: #e67e22; margin-top: 20px; display: block; }
+        .feedback-sub { font-size: 1.6rem; color: #555; display: block; margin-top: 10px; margin-bottom: 30px; line-height: 1.4; }
+        
+        .stats-row { display: flex; justify-content: space-around; border-top: 2px solid #eee; padding-top: 20px; }
+        .stat-item { font-size: 1.3rem; color: #777; font-weight: bold; }
+        .stat-item b { display: block; font-size: 2.2rem; color: #27ae60; }
+
+        #alert { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 30px; border: 10px solid var(--danger); z-index: 4000; text-align: center; width: 550px; box-shadow: 0 0 150px rgba(0,0,0,0.7); }
+        #alert h2 { font-size: 2.5rem; color: var(--danger); margin-top: 0; }
+        #alert-msg { font-size: 1.6rem; line-height: 1.5; margin-bottom: 25px; color: #333; }
+
+        button { padding: 18px 45px; font-size: 1.6rem; font-weight: bold; cursor: pointer; border-radius: 15px; border: none; background: #e67e22; color: white; box-shadow: 0 5px 0 #b35d15; }
+        
+        .track { position: absolute; bottom: 0; width: 100%; height: 50px; background: rgba(0,0,0,0.05); border-top: 2px dashed #bbb; }
+        #cart { position: absolute; bottom: 2px; left: 0; width: 70px; transition: left 1s linear; }
+
+        .heart-effect { position: absolute; pointer-events: none; animation: flyToScore 0.8s ease-in forwards; font-size: 35px; z-index: 2000; }
+        @keyframes flyToScore { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.5) translate(var(--tx), var(--ty)); } }
+    </style>
+</head>
+<body>
+
+<div id="start" class="overlay">
+    <h1>🛒 ЗДРАВОСЛОВНА МИСИЯ</h1>
+    <div class="author">Създал: Дочка Кючукова</div>
+    <div class="instruction-box">
+        • Трябва да събереш <b>10 РАЗЛИЧНИ</b> здравословни продукта за 30 секунди.<br>
+        • <b>ВНИМАВАЙ:</b> Ако избереш вредна храна, играта спира и губиш време!<br>
+        • Веднъж избран продукт не може да се вземе отново – търси нови неща!
+    </div>
+    <button onclick="startGame()">ЗАПОЧНИ ПАЗАРУВАНЕТО</button>
+</div>
+
+<div class="ui">
+    Различни продукти: <span id="count" style="color:var(--main-green)">0</span> / 10 
+    <span id="score-heart" style="margin-left:15px; font-size: 2.5rem;">❤️</span>
+</div>
+
+<div class="shop-container">
+    <div class="section" id="sec-1"></div>
+    <div class="section" id="sec-2"></div>
+    <div class="section" id="sec-3"></div>
+    <div class="section" id="sec-4"></div>
+</div>
+
+<div class="track">
+    <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" id="cart" alt="Количка">
+</div>
+
+<div id="alert">
+    <h2>ВРЕДНА ХРАНА! 🛑</h2>
+    <p id="alert-msg"></p>
+    <button onclick="closeAlert()">Разбрах грешката си!</button>
+</div>
+
+<div id="finish" class="overlay" style="display:none; background: rgba(44, 62, 80, 0.98);">
+    <div class="certificate-box">
+        <h1 class="cert-header" id="res-title">ГРАМОТА</h1>
+        <span class="feedback-main" id="fb-main"></span>
+        <span class="feedback-sub" id="fb-sub"></span>
+        
+        <div class="stats-row">
+            <div class="stat-item">ПРОДУКТИ<b id="stat-score">0</b></div>
+            <div class="stat-item">ВРЕМЕ (сек)<b id="stat-time">0</b></div>
+            <div class="stat-item">ГРЕШКИ<b id="stat-err">0</b></div>
+        </div>
+        <br>
+        <button onclick="location.reload()">НОВА ИГРА</button>
+    </div>
+</div>
+
+<script>
+    const allProds = [
+        {id: 1, h:true}, {id: 4, h:true}, {id: 8, h:true}, {id: 6, h:true}, {id: 24, h:true}, {id: 11, h:true},
+        {id: 5, h:false, m:"ГАЗИРАНИ НАПИТКИ: Те съдържат огромно количество захар (около 10 чаени лъжички в бутилка!), която разваля зъбите и пречи на концентрацията!"}, 
+        {id: 22, h:true}, 
+        {id: 23, h:false, m:"ЕНЕРГИЙНИ НАПИТКИ: Те са изключително опасни за сърцето на децата и могат да причинят безсъние и треперене!"}, 
+        {id: 7, h:true}, {id: 12, h:true}, {id: 14, h:true},
+        {id: 2, h:false, m:"СОЛЕН ЧИПС: Прекалено многото сол и мазнини в него карат тялото ти да задържа вода и да се чувстваш уморен и тромав!"}, 
+        {id: 15, h:false, m:"СЛАДКИ ПЕЧИВА: Пълни са с бяло брашно и мазнини, които не ти дават истинска сила, а само кратък прилив на енергия."}, 
+        {id: 18, h:false, m:"ШОКОЛАДОВИ ДЕСЕРТИ: Пълни са с палмово масло и изкуствени подобрители, които не помагат на мускулите ти да растат!"}, 
+        {id: 9, h:true}, 
+        {id: 10, h:false, m:"БЯЛ ТЕСТЕН ХЛЯБ: При него полезните фибри са премахнати. Винаги предпочитай пълнозърнест хляб за здрави коремчета!"}, 
+        {id: 16, h:true},
+        {id: 17, h:true}, {id: 20, h:true}, {id: 19, h:true}, 
+        {id: 13, h:false, m:"ПРЕРАБОТЕНО МЕСО: Кренвиршите и евтините салами често съдържат много нитрати и малко истинско месо."}, 
+        {id: 21, h:true}, {id: 3, h:true}
+    ];
+
+    let score = 0, errors = 0, timeLeft = 30, gameActive = false, isPaused = false;
+    let pickedIds = new Set(); // Следим уникалните ИД-та на продуктите
+
+    function startGame() {
+        document.getElementById('start').style.display = 'none';
+        gameActive = true;
+        
+        for(let s=0; s<4; s++) {
+            const container = document.getElementById(`sec-${s+1}`);
+            const sectionProds = allProds.slice(s*6, (s+1)*6);
+            sectionProds.forEach(p => {
+                const shelf = document.createElement('div');
+                shelf.className = 'shelf';
+                for(let i=0; i<5; i++) { 
+                    const img = document.createElement('img');
+                    img.src = p.id + '.png';
+                    img.className = 'product prod-id-' + p.id; // Добавяме клас с ID
+                    img.onclick = (e) => handlePick(p, e);
+                    shelf.appendChild(img);
+                }
+                container.appendChild(shelf);
+            });
+        }
+
+        const timer = setInterval(() => {
+            if(!gameActive) return;
+            timeLeft--;
+            document.getElementById('cart').style.left = ((30-timeLeft)/30)*94 + '%';
+            if(timeLeft <= 0 || score >= 10) { clearInterval(timer); finishGame(); }
+        }, 1000);
+    }
+
+    function handlePick(p, e) {
+        if(isPaused || !gameActive || pickedIds.has(p.id)) return;
+
+        if(!p.h) {
+            errors++;
+            isPaused = true; 
+            document.getElementById('alert-msg').innerText = p.m;
+            document.getElementById('alert').style.display = 'block';
+            return;
+        }
+
+        // Логика за здравословен продукт
+        pickedIds.add(p.id); // Записваме, че този тип продукт е взет
+        score++;
+        document.getElementById('count').innerText = score;
+        
+        // Деактивираме ВСИЧКИ копия на този продукт на екрана
+        const allCopies = document.querySelectorAll('.prod-id-' + p.id);
+        allCopies.forEach(img => img.classList.add('already-picked'));
+        
+        createHearts(e.clientX, e.clientY);
+    }
+
+    function closeAlert() {
+        document.getElementById('alert').style.display = 'none';
+        isPaused = false;
+    }
+
+    function createHearts(startX, startY) {
+        const target = document.getElementById('score-heart').getBoundingClientRect();
+        const heart = document.createElement('div');
+        heart.className = 'heart-effect'; heart.innerText = '❤️';
+        heart.style.left = startX + 'px'; heart.style.top = startY + 'px';
+        heart.style.setProperty('--tx', `${target.left - startX}px`);
+        heart.style.setProperty('--ty', `${target.top - startY}px`);
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 800);
+    }
+
+    function finishGame() {
+        gameActive = false;
+        document.getElementById('finish').style.display = 'flex';
+        document.getElementById('stat-score').innerText = score;
+        document.getElementById('stat-time').innerText = 30 - timeLeft;
+        document.getElementById('stat-err').innerText = errors;
+        
+        const title = document.getElementById('res-title');
+        const fbMain = document.getElementById('fb-main');
+        const fbSub = document.getElementById('fb-sub');
+        
+        if (score >= 10 && errors === 0) {
+            title.innerText = "ЗЛАТНА ГРАМОТА 🏆";
+            fbMain.innerText = "МАГИСТЪР ПО ЗДРАВЕ!";
+            fbSub.innerText = "Ти си истински експерт! Твоето тяло ти благодари за умните и здравословни избори!";
+            fbMain.style.color = "#27ae60";
+        } else if (score >= 7 && errors <= 2) {
+            title.innerText = "ГРАМОТА ЗА ЗНАНИЯ 🥈";
+            fbMain.innerText = "ДОБЪР ОПИТ!";
+            fbSub.innerText = "Справи се много добре! Продължавай да учиш кои храни те правят силен и умен.";
+            fbMain.style.color = "#2980b9";
+        } else {
+            title.innerText = "ГРАМОТА ЗА УЧАСТИЕ 🎖️";
+            fbMain.innerText = "ОПИТАЙ ОТНОВО!";
+            fbSub.innerText = "Внимавай повече със захарните капани! Твоето тяло има нужда от истинска храна, за да расте.";
+            fbMain.style.color = "#c0392b";
+        }
+    }
+</script>
+</body>
+</html>
