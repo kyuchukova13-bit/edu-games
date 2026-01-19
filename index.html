@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кирил и Методий - Интерактивен пакет</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .perspective-1000 { perspective: 1000px; }
+        .flashcard-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back {
+            backface-visibility: hidden;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .flashcard-back { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen pb-20">
+    <!-- Header -->
+    <div class="bg-blue-900 text-white py-10 px-4 text-center shadow-xl">
+        <h1 class="text-3xl md:text-5xl font-bold mb-4">Делото на Кирил и Методий</h1>
+        <p class="text-blue-200 text-lg max-w-2xl mx-auto italic">Интерактивен тест и 25 флашкарти за Вашите ученици</p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex justify-center sticky top-0 z-10 bg-white shadow-md p-2 mb-8">
+        <button onclick="switchTab('quiz')" id="btn-quiz" class="px-6 py-2 mx-2 rounded-full font-bold bg-blue-600 text-white transition">Тест (10 въпроса)</button>
+        <button onclick="switchTab('cards')" id="btn-cards" class="px-6 py-2 mx-2 rounded-full font-bold bg-gray-200 text-gray-700 transition">Флашкарти (25 броя)</button>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Quiz Section -->
+        <div id="section-quiz" class="block">
+            <div id="quiz-container" class="space-y-6"></div>
+            <div class="mt-10 p-6 bg-white rounded-2xl shadow-lg text-center">
+                <button onclick="calculateResult()" class="bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 px-10 rounded-xl transition shadow-lg transform hover:scale-105">Провери резултата</button>
+                <div id="quiz-result" class="hidden mt-6 p-6 rounded-xl text-2xl font-bold border-4"></div>
+            </div>
+        </div>
+
+        <!-- Cards Section -->
+        <div id="section-cards" class="hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="cards-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { q: "Коя е основната причина за създаването на българската азбука?", o: ["Нуждата от език за търговия", "Нуждата хората да разбират проповедите", "Заповед от Византия", "Желанието на папата"], c: 1 },
+            { q: "Кога е създадена славянската азбука?", o: ["864 г.", "886 г.", "855 г.", "917 г."], c: 2 },
+            { q: "Къде проповядват братята преди Рим?", o: ["България", "Великоморавия", "Сърбия", "Русия"], c: 1 },
+            { q: "Кой владетел посреща учениците им?", o: ["Цар Симеон", "Хан Аспарух", "Княз Борис I", "Цар Иван Асен II"], c: 2 },
+            { q: "Кои градове стават книжовни средища?", o: ["София и Пловдив", "Охрид и Плиска", "Солун и Рим", "Търново и Видин"], c: 1 },
+            { q: "Какво значение има старобългарският език за Европа?", o: ["Става трети книжовен език", "Използва се само в Плиска", "Заменя латинския", "Става търговски език"], c: 0 },
+            { q: "Кой е авторът на „За буквите“?", o: ["Климент Охридски", "Патриарх Евтимий", "Черноризец Храбър", "Свети Наум"], c: 2 },
+            { q: "Каква е била майката на братята?", o: ["Гъркиня", "От знатен славянобългарски род", "Италианка", "Римлянка"], c: 1 },
+            { q: "Какво означава „Книжнина“?", o: ["Библиотека", "Название за книгите през Средновековието", "Вид хартия", "Място за писане"], c: 1 },
+            { q: "Какво правят учениците в България?", o: ["Воюват", "Напускат страната", "Подготвят духовници и учители", "Стават търговци"], c: 2 }
+        ];
+
+        const cardsData = [
+            {f: "855 г.", b: "Година на създаване на азбуката."},
+            {f: "Глаголица", b: "Първата славянска азбука."},
+            {f: "Солун", b: "Роден град на братята."},
+            {f: "Княз Борис I", b: "Български владетел, приел учениците."},
+            {f: "Охрид", b: "Книжовно средище на Климент."},
+            {f: "Плиска", b: "Книжовно средище на Наум."},
+            {f: "Черноризец Храбър", b: "Автор на „За буквите“."},
+            {f: "Магнаурска школа", b: "Където учи Кирил."},
+            {f: "Великоморавия", b: "Държавата на тяхната мисия."},
+            {f: "Рим", b: "Където папата благославя азбуката."},
+            {f: "Старобългарски", b: "Третият официален език на Европа."},
+            {f: "Свети Климент", b: "Основател на Охридската школа."},
+            {f: "Свети Наум", b: "Основател на школата в Плиска."},
+            {f: "Черноризец", b: "Титла, означаваща монах."},
+            {f: "Средище", b: "Център на дейност."},
+            {f: "Димитър Гюдженов", b: "Художник на прочутата картина в урока."},
+            {f: "Покровители на Европа", b: "Титла на братята от 1980 г."},
+            {f: "Троезична ерес", b: "Спорът за езиците в църквата."},
+            {f: "Методий", b: "По-големият брат."},
+            {f: "Константин", b: "Рожденото име на Кирил."},
+            {f: "Пергамент", b: "Материал за писане на книги."},
+            {f: "Хиляди учители", b: "Резултатът от дейността на школите."},
+            {f: "Славяни", b: "Народите, за които е създадена азбуката."},
+            {f: "9. век", b: "Времето на тези велики събития."},
+            {f: "Приемственост", b: "България спасява делото на братята."},
+        ];
+
+        function switchTab(tab) {
+            document.getElementById('section-quiz').classList.toggle('hidden', tab !== 'quiz');
+            document.getElementById('section-cards').classList.toggle('hidden', tab !== 'cards');
+            document.getElementById('btn-quiz').className = tab === 'quiz' ? 'px-6 py-2 mx-2 rounded-full font-bold bg-blue-600 text-white transition' : 'px-6 py-2 mx-2 rounded-full font-bold bg-gray-200 text-gray-700 transition';
+            document.getElementById('btn-cards').className = tab === 'cards' ? 'px-6 py-2 mx-2 rounded-full font-bold bg-green-600 text-white transition' : 'px-6 py-2 mx-2 rounded-full font-bold bg-gray-200 text-gray-700 transition';
+        }
+
+        // Load Quiz
+        const qContainer = document.getElementById('quiz-container');
+        quizData.forEach((data, i) => {
+            const card = document.createElement('div');
+            card.className = "bg-white p-6 rounded-2xl shadow-md border-l-8 border-blue-500";
+            card.innerHTML = `
+                <h3 class="text-xl font-bold mb-4 text-gray-800">${i+1}. ${data.q}</h3>
+                <div class="space-y-3">
+                    ${data.o.map((opt, oi) => `
+                        <label class="flex items-center p-3 rounded-lg border hover:bg-blue-50 cursor-pointer transition">
+                            <input type="radio" name="q${i}" value="${oi}" class="w-5 h-5 text-blue-600">
+                            <span class="ml-3 text-gray-700">${opt}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+            qContainer.appendChild(card);
+        });
+
+        // Load Cards
+        const cContainer = document.getElementById('cards-container');
+        cardsData.forEach(data => {
+            const card = document.createElement('div');
+            card.className = "flashcard h-48 perspective-1000 cursor-pointer";
+            card.onclick = () => card.classList.toggle('flipped');
+            card.innerHTML = `
+                <div class="flashcard-inner shadow-lg">
+                    <div class="flashcard-front bg-white border-2 border-green-200 text-xl font-bold text-gray-800">
+                        ${data.f}
+                    </div>
+                    <div class="flashcard-back bg-green-600 text-white text-lg font-medium">
+                        ${data.b}
+                    </div>
+                </div>
+            `;
+            cContainer.appendChild(card);
+        });
+
+        function calculateResult() {
+            let score = 0;
+            quizData.forEach((data, i) => {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if(selected && parseInt(selected.value) === data.c) score++;
+            });
+            const res = document.getElementById('quiz-result');
+            res.classList.remove('hidden');
+            const percent = (score / quizData.length) * 100;
+            if(percent >= 80) {
+                res.className = "mt-6 p-6 rounded-xl text-2xl font-bold border-4 bg-green-50 border-green-500 text-green-700";
+                res.innerHTML = `Отлично! Верни отговори: ${score}/10 <br> <span class="text-lg">Ти си истински познавач на българската история!</span>`;
+            } else {
+                res.className = "mt-6 p-6 rounded-xl text-2xl font-bold border-4 bg-orange-50 border-orange-400 text-orange-700";
+                res.innerHTML = `Добър опит! Верни отговори: ${score}/10 <br> <span class="text-lg">Прегледай флашкартите и опитай пак!</span>`;
+            }
+            res.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
+```
